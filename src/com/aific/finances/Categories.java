@@ -336,7 +336,9 @@ public class Categories extends AbstractList<Category> {
 	 */
 	public static Categories fromBuiltin() {
 
-		URL categoriesURL = Main.class.getResource("/resources/categories.xml");
+		// Allow private builds with a different pre-defined categories file
+		URL categoriesURL = Main.class.getResource("/resources/categories-private.xml");
+		if (categoriesURL == null) categoriesURL = Main.class.getResource("/resources/categories.xml");
 
 		try {
 			InputStream categoriesURLStream = categoriesURL.openStream();
