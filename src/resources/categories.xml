@@ -1,0 +1,243 @@
+<categories>
+
+  <category id="salary">
+    <name>Salary</name>
+    <color_red>128</color_red>
+    <color_green>255</color_green>
+    <color_blue>128</color_blue>
+    <type>INCOME</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="gifts_received">
+    <name>Gifts - Received</name>
+    <color_red>128</color_red>
+    <color_green>200</color_green>
+    <color_blue>128</color_blue>
+    <type>INCOME</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="other_income">
+    <name>Other Income</name>
+    <color_red>128</color_red>
+    <color_green>200</color_green>
+    <color_blue>128</color_blue>
+    <type>INCOME</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="refund">
+    <name>Refund</name>
+    <color_red>128</color_red>
+    <color_green>200</color_green>
+    <color_blue>128</color_blue>
+    <type>INCOME</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="account_check">
+    <name>Verification</name>
+    <color_red>136</color_red>
+    <color_green>136</color_green>
+    <color_blue>136</color_blue>
+    <type>BALANCED</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="gifts">
+    <name>Gifts - Bought</name>
+    <color_red>128</color_red>
+    <color_green>128</color_green>
+    <color_blue>200</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="atm">
+    <name>ATM</name>
+    <color_red>196</color_red>
+    <color_green>196</color_green>
+    <color_blue>196</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="fees">
+    <name>Bank Products and Fees</name>
+    <color_red>255</color_red>
+    <color_green>128</color_green>
+    <color_blue>128</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="coffee">
+    <name>Coffee</name>
+    <color_red>176</color_red>
+    <color_green>255</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="eating_out">
+    <name>Eating Out</name>
+    <color_red>176</color_red>
+    <color_green>212</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="groceries">
+    <name>Groceries</name>
+    <color_red>128</color_red>
+    <color_green>255</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="housing">
+    <name>Housing</name>
+    <color_red>176</color_red>
+    <color_green>176</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="transportation">
+    <name>Transportation</name>
+    <color_red>255</color_red>
+    <color_green>176</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="car">
+    <name>Car</name>
+    <color_red>176</color_red>
+    <color_green>100</color_green>
+    <color_blue>176</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="charity">
+    <name>Charity</name>
+    <color_red>0</color_red>
+    <color_green>255</color_green>
+    <color_blue>128</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="entertainment">
+    <name>Entertainment</name>
+    <color_red>0</color_red>
+    <color_green>128</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="tithe">
+    <name>Tithe</name>
+    <color_red>176</color_red>
+    <color_green>255</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="travel">
+    <name>Travel (Flights and Hotels)</name>
+    <color_red>255</color_red>
+    <color_green>176</color_green>
+    <color_blue>176</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="school">
+    <name>School</name>
+    <color_red>196</color_red>
+    <color_green>196</color_green>
+    <color_blue>196</color_blue>=
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="phone">
+    <name>Phone</name>
+    <color_red>255</color_red>
+    <color_green>170</color_green>
+    <color_blue>0</color_blue>=
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="shopping">
+    <name>Shopping</name>
+    <color_red>255</color_red>
+    <color_green>128</color_green>
+    <color_blue>255</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="other_expenses">
+    <name>Other Expenses</name>
+    <color_red>128</color_red>
+    <color_green>128</color_green>
+    <color_blue>128</color_blue>
+    <type>EXPENSE</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="transfer">
+    <name>Transfer</name>
+    <color_red>196</color_red>
+    <color_green>196</color_green>
+    <color_blue>196</color_blue>
+    <type>BALANCED</type>
+    <detectors>
+    </detectors>
+  </category>
+
+  <category id="savings">
+    <name>Savings</name>
+    <color_red>160</color_red>
+    <color_green>255</color_green>
+    <color_blue>160</color_blue>
+    <type>EXTERNAL</type>
+    <detectors>
+    </detectors>
+  </category>
+  
+</categories>
