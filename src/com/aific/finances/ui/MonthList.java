@@ -49,7 +49,7 @@ import com.aific.finances.util.Utils;
  * 
  * @author Peter Macko
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial", "rawtypes" })
 public class MonthList extends JList {
 
 	private DefaultListModel<MonthElement> model;
@@ -76,6 +76,7 @@ public class MonthList extends JList {
 	 * 
 	 * @param document the document
 	 */
+	@SuppressWarnings("unchecked")
 	public MonthList(Document document) {
 		super(new DefaultListModel<MonthElement>()); 
 		
@@ -1029,7 +1030,7 @@ public class MonthList extends JList {
 	/**
 	 * Cell renderer
 	 */
-	private class CellRenderer implements ListCellRenderer {
+	private class CellRenderer implements ListCellRenderer<MonthElement> {
 		
 		private Cell cell;
 		
@@ -1063,7 +1064,7 @@ public class MonthList extends JList {
 		 * @return the cell renderer
 		 */
 		@Override
-		public Component getListCellRendererComponent(JList list, Object value,
+		public Component getListCellRendererComponent(JList<? extends MonthElement> list, MonthElement value,
 				int index, boolean isSelected, boolean cellHasFocus) {
 			
 			MonthElement e = (MonthElement) value;

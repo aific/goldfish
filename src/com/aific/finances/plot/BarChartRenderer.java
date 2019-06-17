@@ -66,7 +66,7 @@ public class BarChartRenderer<X> implements ChartRenderer<X> {
 				if (d == null || d.isEmpty()) continue;
 				
 				Double y = d.get(x);
-				if (y == null) y = new Double(0);
+				if (y == null) y = Double.valueOf(0.0);
 				
 				if (s == null) {
 					g.setColor(Color.BLACK);

@@ -134,8 +134,10 @@ public class MainMenu implements ActionListener {
 	 * @param keyCode the virtual key
 	 * @return the accelerator
 	 */
+	@SuppressWarnings("deprecation")
 	private static KeyStroke getKeyStrokeForMenu(int keyCode) {
-		return KeyStroke.getKeyStroke(keyCode, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask());
+		return KeyStroke.getKeyStroke(keyCode, Toolkit.getDefaultToolkit()
+				.getMenuShortcutKeyMask());
 	}
 	
 	
@@ -146,8 +148,10 @@ public class MainMenu implements ActionListener {
 	 * @param modifier the modifiers
 	 * @return the accelerator
 	 */
+	@SuppressWarnings("deprecation")
 	private static KeyStroke getKeyStrokeForMenu(int keyCode, int modifiers) {
-		return KeyStroke.getKeyStroke(keyCode, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() | modifiers);
+		return KeyStroke.getKeyStroke(keyCode, Toolkit.getDefaultToolkit()
+				.getMenuShortcutKeyMask() | modifiers);
 	}
 
 

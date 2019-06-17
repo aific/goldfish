@@ -264,7 +264,8 @@ public class Account {
 		
 		TransactionHistoryReader reader;
 		try {
-			reader = (TransactionHistoryReader) Class.forName(sReader).newInstance();
+			reader = (TransactionHistoryReader) Class.forName(sReader)
+					.getDeclaredConstructor().newInstance();
 		}
 		catch (Exception e) {
 			throw new RuntimeException(e);

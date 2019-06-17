@@ -169,7 +169,7 @@ public class JBetterTable<T> extends JTable {
 	 * 
 	 * @param model the new model
 	 */
-	public void setModel(TableModel model)
+	protected void setModel(TableModel model)
 	{
 		super.setModel(model);
 

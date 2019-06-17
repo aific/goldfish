@@ -40,7 +40,7 @@ public class LineChartRenderer<X> implements ChartRenderer<X> {
 			
 			for (X x : xValues) {
 				Double y = dataSeries.getValue().get(x);
-				if (y == null) y = new Double(0);
+				if (y == null) y = Double.valueOf(0.0);
 				
 				Point p = coordinates.translate(x, y);
 				
