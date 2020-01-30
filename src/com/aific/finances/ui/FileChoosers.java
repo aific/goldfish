@@ -18,6 +18,8 @@ import com.aific.finances.util.FileExtensionFilter;
 public class FileChoosers {
 	
 	private static FileExtensionFilter csvFilter;
+	@SuppressWarnings("unused")
+	private static FileExtensionFilter ofxFilter;
 	private static FileExtensionFilter documentFilter;
 	
 	private static File lastChosenTransactionsImportFile = null;
@@ -30,12 +32,13 @@ public class FileChoosers {
 	 */
 	static {
 		csvFilter = new FileExtensionFilter("CSV file (*.csv)", "csv");
+		ofxFilter = new FileExtensionFilter("OFX file (*.ofx, *.qfx)", "ofx", "qfx");
 		documentFilter = new FileExtensionFilter(Main.PROGRAM_NAME + " file (*." + Document.FILE_EXTENSION + ")", Document.FILE_EXTENSION);
 	}
 	
 	
 	/**
-	 * Choose a CSV file to open or save
+	 * Choose a transactions file to open or save
 	 */
 	public static File chooseTransactionsImportFile(Component parent, String title, boolean open)
 	{
