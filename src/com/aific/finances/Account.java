@@ -1,8 +1,13 @@
 package com.aific.finances;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.aific.finances.io.TransactionHistoryReader;
 
@@ -19,6 +24,7 @@ public class Account {
 	private String id;
 
 	private String institution;
+	private List<String> numbers;
 	private AccountType type;
 	private String name;
 	private String shortName;
@@ -31,23 +37,23 @@ public class Account {
 	 * @param accounts the parent collection of accounts
 	 * @param id the unique ID
 	 * @param institution the institution
+	 * @param numbers the account numbers (there can be more than one if the number changed)
 	 * @param type the account type
 	 * @param name the account name
 	 * @param shortName the short account name
 	 * @param reader the transaction history reader
 	 */
-	public Account(Accounts accounts, String id, String institution,
-			AccountType type, String name, String shortName,
+	public Account(String id, String institution,
+			List<String> numbers, AccountType type, String name, String shortName,
 			TransactionHistoryReader reader) {
 		
 		this.id = id;
 		this.institution = institution;
+		this.numbers = numbers;
 		this.type = type;
 		this.name = name;
 		this.shortName = shortName;
 		this.reader = reader;
-		
-		accounts.accounts.put(id, this);
 	}
 	
 	
@@ -78,6 +84,16 @@ public class Account {
 	 */
 	public void setInstitution(String institution) {
 		this.institution = institution;
+	}
+
+
+	/**
+	 * Get the collection of all account numbers
+	 * 
+	 * @return the account numbers
+	 */
+	public List<String> getNumbers() {
+		return Collections.unmodifiableList(numbers);
 	}
 
 
@@ -220,6 +236,12 @@ public class Account {
 		xmlInstitution.appendChild(document.createTextNode(institution));
 		me.appendChild(xmlInstitution);
 		
+		for (String n : numbers) {
+			Element xmlNumber = document.createElement("number");
+			xmlNumber.appendChild(document.createTextNode(n));
+			me.appendChild(xmlNumber);
+		}
+		
 		Element xmlType = document.createElement("type");
 		xmlType.appendChild(document.createTextNode(type.name()));
 		me.appendChild(xmlType);
@@ -247,7 +269,7 @@ public class Account {
 	 * @param element the XML element
 	 * @return the object
 	 */
-	public static Account fromXMLElement(Element element, Accounts accounts) {
+	public static Account fromXMLElement(Element element) {
 		
 		if (!element.getNodeName().equals(XML_ELEMENT)) {
 			throw new IllegalArgumentException();
@@ -260,6 +282,12 @@ public class Account {
 		String shortName = element.getElementsByTagName("short_name").item(0).getTextContent();
 		String sReader = element.getElementsByTagName("reader").item(0).getTextContent();
 		
+		NodeList numberElements = element.getElementsByTagName("number");
+		ArrayList<String> numbers = new ArrayList<String>();
+		for (int i = 0; i < numberElements.getLength(); i++) {
+			numbers.add(numberElements.item(i).getTextContent());
+		}
+		
 		AccountType type = Enum.valueOf(AccountType.class, sType);
 		
 		TransactionHistoryReader reader;
@@ -271,6 +299,6 @@ public class Account {
 			throw new RuntimeException(e);
 		}
 		
-		return new Account(accounts, id, institution, type, name, shortName, reader);
+		return new Account(id, institution, numbers, type, name, shortName, reader);
 	}
 }

@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.JFrame;
@@ -16,8 +17,10 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import com.aific.finances.Account;
+import com.aific.finances.Accounts;
 import com.aific.finances.Document;
 import com.aific.finances.Transaction;
+import com.aific.finances.io.OfxFile;
 import com.aific.finances.util.Utils;
 
 
@@ -215,15 +218,47 @@ public class MainMenu implements ActionListener {
 			
 			if (e.getSource() == fileImportMenuItem) {
 				
-				Account a = ChooseAccountDialog.chooseAccount(frame, MainFrame.getInstance().getDocument().getAccounts());
-				if (a == null) return;
-				
-				File f = FileChoosers.chooseTransactionsImportFile(frame, "Import: " + a.getName(), true);
+				File f = FileChoosers.chooseTransactionsImportFile(frame, "Import Transactions", true);
 				if (f == null) return;
 				
 				Document d = MainFrame.getInstance().getDocument();
+				Accounts accounts = MainFrame.getInstance().getDocument().getAccounts();
+				Collection<Transaction> transactions = null;
 				
-				Collection<Transaction> transactions = a.getReader().readTransactions(d, a, f);
+				String extension = Utils.getExtension(f).toLowerCase();
+				switch (extension) {
+				case "ofx":
+				case "qfx": {
+					OfxFile ofx = new OfxFile(f);
+					Account a = ofx.matchAccount(accounts);
+					if (a == null) {
+						a = ofx.getAccount();
+						if (JOptionPane.showConfirmDialog(MainFrame.getInstance(),
+								"Account \"" + a.getName() + "\" is not yet in the document. Add it?",
+								"Import Transactions",
+								 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
+								!= JOptionPane.YES_OPTION) return;
+						accounts.add(a);
+					}
+					// TODO
+					transactions = new ArrayList<Transaction>();
+					break;
+				}
+				case "csv": {
+					Account a = ChooseAccountDialog.chooseAccount(frame, accounts);
+					if (a == null) return;
+					
+					transactions = a.getReader().readTransactions(d, a, f);
+					break;
+				}
+				default:
+					throw new Exception("Unsupported file type");
+				}
+				
+				if (transactions == null) {
+					throw new Exception("Internal error");
+				}
+				
 				MainFrame.getInstance().getDocument().getCategories().detectCategoriesAll(transactions,
 						MainFrame.getInstance().getTransactionTable().getTransactions());
 				

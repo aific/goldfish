@@ -32,9 +32,10 @@
 package com.aific.finances.util;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.LinkedList;
 
-import javax.swing.filechooser.*;
+import javax.swing.filechooser.FileFilter;
 
 
 /**
@@ -43,12 +44,12 @@ import javax.swing.filechooser.*;
  * @author Peter Macko
  * @version 1.00
  */
-public class FileGroupFilter extends FileFilter {
+public class FileExtensionGroupFilter extends FileFilter implements FilenameFilter {
 	
 	public static final String DEFAULT_NAME = "All Supported Formats";
 	
 	private String name;
-	private LinkedList<FileFilter> filters;
+	private LinkedList<FileExtensionFilter> filters;
 	
 	
     /**
@@ -56,9 +57,9 @@ public class FileGroupFilter extends FileFilter {
 	 *
 	 * @param name the name of the filter
 	 */
-	public FileGroupFilter(String name) {
+	public FileExtensionGroupFilter(String name) {
 		this.name = name;
-		this.filters = new LinkedList<FileFilter>();
+		this.filters = new LinkedList<FileExtensionFilter>();
 	}
 
 
@@ -68,7 +69,7 @@ public class FileGroupFilter extends FileFilter {
 	 * @param name the name of the filter
 	 * @param filters the array of file filters
 	 */
-	public FileGroupFilter(String name, FileFilter[] filters) {
+	public FileExtensionGroupFilter(String name, FileExtensionFilter... filters) {
 		this(name);
 		for (int i = 0; i < filters.length; i++) add(filters[i]);
 	}
@@ -79,7 +80,7 @@ public class FileGroupFilter extends FileFilter {
 	 *
 	 * @param filters the array of file filters
 	 */
-	public FileGroupFilter(FileFilter[] filters) {
+	public FileExtensionGroupFilter(FileExtensionFilter... filters) {
 		this(DEFAULT_NAME, filters);
 	}
 	
@@ -99,7 +100,7 @@ public class FileGroupFilter extends FileFilter {
 	 *
 	 * @param filter the filter to add
 	 */
-	public void add(FileFilter filter) {
+	public void add(FileExtensionFilter filter) {
 		filters.add(filter);
 	}
 	
@@ -112,8 +113,25 @@ public class FileGroupFilter extends FileFilter {
 	 */
     public boolean accept(File f) {
 
-    	for (FileFilter filter : filters) {
+    	for (FileExtensionFilter filter : filters) {
         	if (filter.accept(f)) return true;
+        }
+    	
+    	return false;
+    }
+	
+	
+	/**
+	 * Determine whether the given file should be accepted by the filter
+	 *
+	 * @param dir the directory
+	 * @param name the file name
+	 * @return true if the file was accepted by the filter
+	 */
+    public boolean accept(File dir, String name) {
+		
+    	for (FileExtensionFilter filter : filters) {
+        	if (filter.accept(dir, name)) return true;
         }
     	
     	return false;

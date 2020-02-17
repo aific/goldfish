@@ -8,6 +8,7 @@ import java.io.File;
 import com.aific.finances.Document;
 import com.aific.finances.Main;
 import com.aific.finances.util.FileExtensionFilter;
+import com.aific.finances.util.FileExtensionGroupFilter;
 
 
 /**
@@ -18,8 +19,8 @@ import com.aific.finances.util.FileExtensionFilter;
 public class FileChoosers {
 	
 	private static FileExtensionFilter csvFilter;
-	@SuppressWarnings("unused")
 	private static FileExtensionFilter ofxFilter;
+	private static FileExtensionGroupFilter importFilter;
 	private static FileExtensionFilter documentFilter;
 	
 	private static File lastChosenTransactionsImportFile = null;
@@ -33,6 +34,8 @@ public class FileChoosers {
 	static {
 		csvFilter = new FileExtensionFilter("CSV file (*.csv)", "csv");
 		ofxFilter = new FileExtensionFilter("OFX file (*.ofx, *.qfx)", "ofx", "qfx");
+		importFilter = new FileExtensionGroupFilter(ofxFilter, csvFilter);
+		
 		documentFilter = new FileExtensionFilter(Main.PROGRAM_NAME + " file (*." + Document.FILE_EXTENSION + ")", Document.FILE_EXTENSION);
 	}
 	
@@ -49,7 +52,7 @@ public class FileChoosers {
 			fd.setDirectory(lastChosenTransactionsImportFile.getParentFile().getAbsolutePath());
 			fd.setFile(lastChosenTransactionsImportFile.getName());
 		}
-		fd.setFilenameFilter(csvFilter);
+		fd.setFilenameFilter(importFilter);
 		
 		fd.setVisible(true);
 		

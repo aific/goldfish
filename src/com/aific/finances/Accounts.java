@@ -19,7 +19,7 @@ public class Accounts {
 	
 	public static final String XML_ELEMENT = "accounts";
 	
-	HashMap<String, Account> accounts;
+	private HashMap<String, Account> accounts;
 	
 	
 	/**
@@ -27,6 +27,19 @@ public class Accounts {
 	 */
 	public Accounts() {
 		this.accounts = new HashMap<String, Account>();
+	}
+	
+	
+	/**
+	 * Add an account
+	 * 
+	 * @param account the account
+	 */
+	public void add(Account account) {
+		if (accounts.putIfAbsent(account.getId(), account) != null) {
+			// Do we need this to be an error?
+			throw new IllegalArgumentException("The account has been already added");
+		}
 	}
 	
 	
@@ -92,7 +105,9 @@ public class Accounts {
 			Node n = accountsList.item(i);
 			if (n.getNodeType() != Node.ELEMENT_NODE) throw new IllegalArgumentException();
 			
-			Account.fromXMLElement((Element) n, accounts);
+			Account a = Account.fromXMLElement((Element) n);
+			accounts.accounts.put(a.getId(), a);
+
 		}
 		
 		return accounts;

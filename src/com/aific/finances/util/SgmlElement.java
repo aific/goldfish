@@ -2,7 +2,9 @@ package com.aific.finances.util;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 
 /**
@@ -15,6 +17,7 @@ public class SgmlElement {
 	private String tag;
 	private String text;
 	private ArrayList<SgmlElement> children;
+	private Map<String, SgmlElement> map;
 	
 
 	/**
@@ -26,6 +29,7 @@ public class SgmlElement {
 		this.tag = tag;
 		this.text = "";
 		this.children = new ArrayList<SgmlElement>();
+		this.map = new HashMap<String, SgmlElement>();
 	}
 
 
@@ -56,6 +60,37 @@ public class SgmlElement {
 	 */
 	public ArrayList<SgmlElement> getChildren() {
 		return children;
+	}
+	
+	
+	/**
+	 * Follow a path and get the element.
+	 * 
+	 * @param path the tags
+	 * @return the child element (first if there are more than one) or null if not
+	 */
+	public SgmlElement get(String... path) {
+		
+		SgmlElement e = this;
+		for (String t : path) {
+			e = e.map.get(t);
+			if (e == null) return null;
+		}
+		
+		return e;
+	}
+	
+	
+	/**
+	 * Follow a path and get the text associated with the last element.
+	 * 
+	 * @param path the tags
+	 * @return the text, or null if none
+	 */
+	public String getText(String... path) {
+		
+		SgmlElement e = get(path);
+		return e == null ? null : e.text;
 	}
 	
 	
@@ -178,7 +213,10 @@ public class SgmlElement {
 							throw new ParseException("Unexpected second root tag", p);
 						}
 					}
-					if (!stack.isEmpty()) stack.peek().children.add(element);
+					if (!stack.isEmpty()) {
+						stack.peek().children.add(element);
+						stack.peek().map.putIfAbsent(element.getTag(), element);
+					}
 					stack.push(element);
 					
 					p = str.indexOf('>', p) + 1;
@@ -246,6 +284,7 @@ public class SgmlElement {
 						// Should this be an error?
 					}
 					inner.text += text;
+					inner.text = inner.text.strip();
 				}
 			}
 		}
