@@ -187,7 +187,7 @@ public class TransactionList extends AbstractSharedList<Transaction> {
 			for (Transaction t : transactions) {
 				if (t.getCategoryDetector() == detector.getMatchingDetector()) {
 					if (!detector.accepts(t, this)) {
-						t.setCategoryDetector(c.getNullDetector());
+						t.setCategoryDetector(Categories.NULL_DETECTOR);
 						updated = true;
 					}
 				}
@@ -198,7 +198,7 @@ public class TransactionList extends AbstractSharedList<Transaction> {
 			
 			if (t.getCategoryDetector() == detector) {
 				if (!detector.accepts(t, this)) {
-					t.setCategoryDetector(c.getNullDetector());
+					t.setCategoryDetector(Categories.NULL_DETECTOR);
 					c.detectCategories(t, this);
 					updated = true;
 				}

@@ -29,12 +29,13 @@ import org.xml.sax.SAXParseException;
 public class Categories extends AbstractList<Category> {
 	
 	public static final String XML_ELEMENT = "categories";
+	public static final CategoryDetector NULL_DETECTOR
+		= new CategoryDetector("", null, null, null, ".*", 0, 0, null, null);
 
 	private static Categories builtinCategories = fromBuiltin();
 	
 	ArrayList<Category> categories;
 	HashMap<String, CategoryDetector> detectors;
-	private CategoryDetector nullDetector;
 	
 	private List<CategoriesListener> listeners;
 
@@ -47,8 +48,6 @@ public class Categories extends AbstractList<Category> {
 		this.categories = new ArrayList<Category>();
 		this.detectors = new HashMap<String, CategoryDetector>();
 		this.listeners = null;
-		
-		this.nullDetector = new CategoryDetector("", this, null, null, null, ".*", 0, 0, null, null);
 	}
 	
 	
@@ -110,17 +109,6 @@ public class Categories extends AbstractList<Category> {
 	
 	
 	/**
-	 * Get the null detector for the null category - to be used for transactions
-	 * with no category
-	 * 
-	 * @return the null detector
-	 */
-	public CategoryDetector getNullDetector() {
-		return nullDetector;
-	}
-	
-	
-	/**
 	 * Get a detector by its ID
 	 * 
 	 * @param id the ID
@@ -158,7 +146,7 @@ public class Categories extends AbstractList<Category> {
 		transaction.setCandidateDetectors(matches);
 		
 		if (firstMatch != null
-				&& transaction.getCategoryDetector() == getNullDetector()) {
+				&& transaction.getCategoryDetector() == NULL_DETECTOR) {
 			transaction.setCategoryDetector(firstMatch);
 		}
 		

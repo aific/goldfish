@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.swing.JFrame;
@@ -230,6 +229,9 @@ public class MainMenu implements ActionListener {
 				case "ofx":
 				case "qfx": {
 					OfxFile ofx = new OfxFile(f);
+					if (!ofx.getCurrency().equals("USD")) {
+						throw new Exception("The only currency we currently support is USD");
+					}
 					Account a = ofx.matchAccount(accounts);
 					if (a == null) {
 						a = ofx.getAccount();
@@ -240,8 +242,7 @@ public class MainMenu implements ActionListener {
 								!= JOptionPane.YES_OPTION) return;
 						accounts.add(a);
 					}
-					// TODO
-					transactions = new ArrayList<Transaction>();
+					transactions = ofx.loadTransactions(a);
 					break;
 				}
 				case "csv": {

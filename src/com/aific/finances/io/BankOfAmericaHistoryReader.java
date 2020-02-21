@@ -129,7 +129,7 @@ public class BankOfAmericaHistoryReader implements TransactionHistoryReader {
 				
 				String id = nextLine[indexDate] + "_" + sRunningBal + "_" + description.hashCode();
 				
-				Transaction t = new Transaction(document, account, id, date, description, null, cents);
+				Transaction t = new Transaction(account, id, date, description, null, cents);
 				r.add(t);
 			}
 		

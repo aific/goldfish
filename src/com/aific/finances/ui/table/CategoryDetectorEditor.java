@@ -141,7 +141,7 @@ public class CategoryDetectorEditor extends AbstractCellEditor implements TableC
 		}
 		for (CategoryDetector d : sortingSet) combo.addItem(d);
 		
-		combo.addItem(categories.getNullDetector());
+		combo.addItem(Categories.NULL_DETECTOR);
 		
 		sortingSet.clear();
 		for (Category c : categories.getCategories()) {

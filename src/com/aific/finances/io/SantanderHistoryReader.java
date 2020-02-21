@@ -127,7 +127,7 @@ public class SantanderHistoryReader implements TransactionHistoryReader {
 				int amountCents = Integer.parseInt(strAmount.substring(dotPosition + 1));
 				int cents = (amountWhole * 100 + amountCents) * (haveSign && sign == '-' ? -1 : 1);
 				
-				Transaction t = new Transaction(document, account, serialNum, date, description, null, cents);
+				Transaction t = new Transaction(account, serialNum, date, description, null, cents);
 				r.add(t);
 			}
 		

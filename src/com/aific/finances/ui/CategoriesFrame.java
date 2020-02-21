@@ -36,6 +36,7 @@ public class CategoriesFrame extends JFrame {
 	private static CategoriesFrame instance = null;
 	private static final String TITLE = "Categories and Rules";
 	
+	@SuppressWarnings("unused")
 	private Document document;
 	private boolean modified;
 	
@@ -261,12 +262,13 @@ public class CategoriesFrame extends JFrame {
 				CategoryDetector matchingDetector = null;
 				if (c.getType() == CategoryType.BALANCED) {
 					matchingDetector = new CategoryDetector(UUID.randomUUID().toString(),
-							document.getCategories(), c, "", "", "", 0, 0, "", null);
+							c, "", "", "", 0, 0, "", null);
+					c.add(matchingDetector);
 				}
 					
 				CategoryDetector d = new CategoryDetector(UUID.randomUUID().toString(),
-						document.getCategories(), c, "", "", "", 0, 0,
-						matchingDetector == null ? null : "", matchingDetector);
+						c, "", "", "", 0, 0, matchingDetector == null ? null : "", matchingDetector);
+				c.add(d);
 				
 				d.setDescription("");	// Update the matching detector
 				MainFrame.getInstance().setModified();

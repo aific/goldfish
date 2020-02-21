@@ -38,7 +38,6 @@ public class CategoryDetector implements Comparable<CategoryDetector> {
 	 * of detectors corresponding to the given {@link Category}
 	 *
 	 * @param id the unique ID
-	 * @param categories the collection of categories
 	 * @param category the category (must be contained in the categories collection)
 	 * @param vendor the vendor
 	 * @param description the description of what was detected (optional)
@@ -48,7 +47,7 @@ public class CategoryDetector implements Comparable<CategoryDetector> {
 	 * @param matchingPattern the regular expression pattern for matching opposite transactions
 	 * @param matchingDetector the matching category detector
 	 */
-	public CategoryDetector(String id, Categories categories, Category category, String vendor, String description,
+	public CategoryDetector(String id, Category category, String vendor, String description,
 			String pattern, int min, int max, String matchingPattern, CategoryDetector matchingDetector) {
 		
 		this.id = id;
@@ -65,9 +64,6 @@ public class CategoryDetector implements Comparable<CategoryDetector> {
 		this.compiledMatchingPattern = matchingPattern == null ? null : Pattern.compile(matchingPattern);
 		this.matchingDetector = matchingDetector;
 		if (this.matchingDetector != null) this.matchingDetector.matchingDetector = this; 
-		
-		if (category != null) category.add(this);
-		categories.detectors.put(id, this);
 	}
 	
 	
@@ -420,12 +416,14 @@ public class CategoryDetector implements Comparable<CategoryDetector> {
 			if (matches != null) {
 				String s = description;
 				if ("".equals(s)) s = "Match"; else s = "Match - " + s;
-				matchingDetector = new CategoryDetector(id + "::m", category.getContainer(),
+				matchingDetector = new CategoryDetector(id + "::m",
 						category, vendor, s, matches, -centsMax, -centsMin, pattern, null);
+				category.add(matchingDetector);
 			}
 
-			d = new CategoryDetector(id, category.getContainer(), category, vendor,
+			d = new CategoryDetector(id, category, vendor,
 					description, pattern, centsMin, centsMax, matches, matchingDetector);
+			category.add(d);
 			
 			if (matchingDetector != null) matchingDetector.matchingDetector = d;
 		}

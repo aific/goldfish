@@ -59,11 +59,11 @@ public class Category implements ChartSeries, Comparable<Category> {
 		this.type = type;
 		this.color = color;
 		
-		this.detectors = new HashMap<String, CategoryDetector>();
-		this.nullDetector = new CategoryDetector(id, categories, this, null, null, ".*", 0, 0, null, null);
-		this.detectors.clear();
-		
 		this.listeners = null;
+		this.detectors = new HashMap<String, CategoryDetector>();
+		this.nullDetector = new CategoryDetector(id, this, null, null, ".*", 0, 0, null, null);
+		
+		add(nullDetector);
 		
 		synchronized (categories) {
 			int c = categories.categories.size();
@@ -88,9 +88,12 @@ public class Category implements ChartSeries, Comparable<Category> {
 	 * 
 	 * @param detector the detector
 	 */
-	void add(CategoryDetector detector) {
-		detectors.put(detector.getId(), detector);
-		fireCategoryDetectorAdded(detector);
+	public void add(CategoryDetector detector) {
+		categories.detectors.put(detector.getId(), detector);
+		if (detector != nullDetector) {
+			detectors.put(detector.getId(), detector);
+			fireCategoryDetectorAdded(detector);
+		}
 	}
 	
 	

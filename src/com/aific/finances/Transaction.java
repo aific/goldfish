@@ -51,7 +51,7 @@ public class Transaction {
 	 * @param address the address or payee type information
 	 * @param cents the signed amount as cents, negative for debits, positive for credits
 	 */
-	public Transaction(Document document, Account account, String id, Date date,
+	public Transaction(Account account, String id, Date date,
 			String description, String address, int cents) {
 		
 		this.account = account;
@@ -61,7 +61,7 @@ public class Transaction {
 		this.address = address;
 		this.cents = cents;
 		
-		this.categoryDetector = document.getCategories().getNullDetector();
+		this.categoryDetector = Categories.NULL_DETECTOR;
 		this.note = "";
 		this.candidateDetectors = Collections.emptySet();
 		
@@ -369,7 +369,7 @@ public class Transaction {
 		Date date = XML_DATE_FORMAT.parse(s_date);
 		CategoryDetector cd = s_cd != null ? document.getCategories().detectors.get(s_cd) : null;
 		
-		Transaction transaction = new Transaction(document, account, id, date, description, address, cents);
+		Transaction transaction = new Transaction(account, id, date, description, address, cents);
 		document.getCategories().detectCategories(transaction, transactions);
 		if (cd != null) transaction.setCategoryDetector(cd);
 		if (note != null) transaction.setNote(note);
