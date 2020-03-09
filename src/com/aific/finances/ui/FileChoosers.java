@@ -34,7 +34,7 @@ public class FileChoosers {
 	static {
 		csvFilter = new FileExtensionFilter("CSV file (*.csv)", "csv");
 		ofxFilter = new FileExtensionFilter("OFX file (*.ofx, *.qfx)", "ofx", "qfx");
-		importFilter = new FileExtensionGroupFilter(ofxFilter, csvFilter);
+		importFilter = new FileExtensionGroupFilter(ofxFilter);
 		
 		documentFilter = new FileExtensionFilter(Main.PROGRAM_NAME + " file (*." + Document.FILE_EXTENSION + ")", Document.FILE_EXTENSION);
 	}

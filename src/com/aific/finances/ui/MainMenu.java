@@ -220,7 +220,6 @@ public class MainMenu implements ActionListener {
 				File f = FileChoosers.chooseTransactionsImportFile(frame, "Import Transactions", true);
 				if (f == null) return;
 				
-				Document d = MainFrame.getInstance().getDocument();
 				Accounts accounts = MainFrame.getInstance().getDocument().getAccounts();
 				Collection<Transaction> transactions = null;
 				
@@ -243,13 +242,6 @@ public class MainMenu implements ActionListener {
 						accounts.add(a);
 					}
 					transactions = ofx.loadTransactions(a);
-					break;
-				}
-				case "csv": {
-					Account a = ChooseAccountDialog.chooseAccount(frame, accounts);
-					if (a == null) return;
-					
-					transactions = a.getReader().readTransactions(d, a, f);
 					break;
 				}
 				default:

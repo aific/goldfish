@@ -167,7 +167,7 @@ public class OfxFile {
 		String accountName = institution + " " + shortNumber;
 		String numberHash = Account.hashNumber(accountNumber);
 		return new Account(id, institution, Collections.singletonList(numberHash),
-				accountType, accountName, accountName, null);
+				accountType, accountName, accountName);
 	}
 	
 	

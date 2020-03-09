@@ -12,7 +12,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import com.aific.finances.io.TransactionHistoryReader;
 import com.aific.finances.util.Utils;
 
 
@@ -32,7 +31,6 @@ public class Account {
 	private AccountType type;
 	private String name;
 	private String shortName;
-	private TransactionHistoryReader reader;
 	
 	
 	/**
@@ -45,11 +43,9 @@ public class Account {
 	 * @param type the account type
 	 * @param name the account name
 	 * @param shortName the short account name
-	 * @param reader the transaction history reader
 	 */
 	public Account(String id, String institution,
-			List<String> numberHashes, AccountType type, String name, String shortName,
-			TransactionHistoryReader reader) {
+			List<String> numberHashes, AccountType type, String name, String shortName) {
 		
 		this.id = id;
 		this.institution = institution;
@@ -57,7 +53,6 @@ public class Account {
 		this.type = type;
 		this.name = name;
 		this.shortName = shortName;
-		this.reader = reader;
 	}
 	
 	
@@ -161,26 +156,6 @@ public class Account {
 	}
 
 
-	/**
-	 * Get the transaction history reader
-	 * 
-	 * @return the transaction history reader
-	 */
-	public TransactionHistoryReader getReader() {
-		return reader;
-	}
-
-
-	/**
-	 * Set the transaction history reader
-	 * 
-	 * @param reader the transaction history reader
-	 */
-	public void setReader(TransactionHistoryReader reader) {
-		this.reader = reader;
-	}
-
-
 	/* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
@@ -258,12 +233,6 @@ public class Account {
 		xmlShortName.appendChild(document.createTextNode(shortName));
 		me.appendChild(xmlShortName);
 		
-		if (reader != null) {
-			Element xmlReader = document.createElement("reader");
-			xmlReader.appendChild(document.createTextNode(reader.getClass().getCanonicalName()));
-			me.appendChild(xmlReader);
-		}
-		
 		return me;
 	}
 	
@@ -295,20 +264,7 @@ public class Account {
 		
 		AccountType type = Enum.valueOf(AccountType.class, sType);
 		
-		NodeList eReader = element.getElementsByTagName("reader");
-		String sReader = eReader.getLength() == 0 ? null : eReader.item(0).getTextContent();
-		TransactionHistoryReader reader = null;
-		if (sReader != null) {
-			try {
-				reader = (TransactionHistoryReader) Class.forName(sReader)
-						.getDeclaredConstructor().newInstance();
-			}
-			catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-		}
-		
-		return new Account(id, institution, numberHashes, type, name, shortName, reader);
+		return new Account(id, institution, numberHashes, type, name, shortName);
 	}
 
 
