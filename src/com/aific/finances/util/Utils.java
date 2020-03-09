@@ -193,4 +193,20 @@ public class Utils {
 		if (str.isEmpty()) return "";
 		return "\"" + str.replace("\"", "\"\"") + "\"";
 	}
+	
+	
+	/**
+	 * Convert bytes to string
+	 *
+	 * @param bytes the bytes
+	 * @return the string
+	 */
+	public static String bytesToHex(byte[] bytes) {
+		StringBuilder r = new StringBuilder();
+		for (byte b : bytes) {
+			r.append(Integer.toHexString(((int) b) & 0xff));
+
+		}
+		return r.toString();
+	}
 }

@@ -1,5 +1,8 @@
 package com.aific.finances;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -10,6 +13,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.aific.finances.io.TransactionHistoryReader;
+import com.aific.finances.util.Utils;
 
 
 /**
@@ -24,7 +28,7 @@ public class Account {
 	private String id;
 
 	private String institution;
-	private List<String> numbers;
+	private List<String> numberHashes;
 	private AccountType type;
 	private String name;
 	private String shortName;
@@ -37,19 +41,19 @@ public class Account {
 	 * @param accounts the parent collection of accounts
 	 * @param id the unique ID
 	 * @param institution the institution
-	 * @param numbers the account numbers (there can be more than one if the number changed)
+	 * @param numberHashes the hashes of account numbers (more than one if the number changed)
 	 * @param type the account type
 	 * @param name the account name
 	 * @param shortName the short account name
 	 * @param reader the transaction history reader
 	 */
 	public Account(String id, String institution,
-			List<String> numbers, AccountType type, String name, String shortName,
+			List<String> numberHashes, AccountType type, String name, String shortName,
 			TransactionHistoryReader reader) {
 		
 		this.id = id;
 		this.institution = institution;
-		this.numbers = numbers;
+		this.numberHashes = numberHashes;
 		this.type = type;
 		this.name = name;
 		this.shortName = shortName;
@@ -88,12 +92,12 @@ public class Account {
 
 
 	/**
-	 * Get the collection of all account numbers
+	 * Get the collection of all account number hashes
 	 * 
-	 * @return the account numbers
+	 * @return the account number hashes
 	 */
-	public List<String> getNumbers() {
-		return Collections.unmodifiableList(numbers);
+	public List<String> getNumberHashes() {
+		return Collections.unmodifiableList(numberHashes);
 	}
 
 
@@ -236,8 +240,8 @@ public class Account {
 		xmlInstitution.appendChild(document.createTextNode(institution));
 		me.appendChild(xmlInstitution);
 		
-		for (String n : numbers) {
-			Element xmlNumber = document.createElement("number");
+		for (String n : numberHashes) {
+			Element xmlNumber = document.createElement("number_sha3");
 			xmlNumber.appendChild(document.createTextNode(n));
 			me.appendChild(xmlNumber);
 		}
@@ -254,9 +258,11 @@ public class Account {
 		xmlShortName.appendChild(document.createTextNode(shortName));
 		me.appendChild(xmlShortName);
 		
-		Element xmlReader = document.createElement("reader");
-		xmlReader.appendChild(document.createTextNode(reader.getClass().getCanonicalName()));
-		me.appendChild(xmlReader);
+		if (reader != null) {
+			Element xmlReader = document.createElement("reader");
+			xmlReader.appendChild(document.createTextNode(reader.getClass().getCanonicalName()));
+			me.appendChild(xmlReader);
+		}
 		
 		return me;
 	}
@@ -280,25 +286,47 @@ public class Account {
 		String sType = element.getElementsByTagName("type").item(0).getTextContent();
 		String name = element.getElementsByTagName("name").item(0).getTextContent();
 		String shortName = element.getElementsByTagName("short_name").item(0).getTextContent();
-		String sReader = element.getElementsByTagName("reader").item(0).getTextContent();
 		
-		NodeList numberElements = element.getElementsByTagName("number");
-		ArrayList<String> numbers = new ArrayList<String>();
+		NodeList numberElements = element.getElementsByTagName("number_sha3");
+		ArrayList<String> numberHashes = new ArrayList<String>();
 		for (int i = 0; i < numberElements.getLength(); i++) {
-			numbers.add(numberElements.item(i).getTextContent());
+			numberHashes.add(numberElements.item(i).getTextContent());
 		}
 		
 		AccountType type = Enum.valueOf(AccountType.class, sType);
 		
-		TransactionHistoryReader reader;
-		try {
-			reader = (TransactionHistoryReader) Class.forName(sReader)
-					.getDeclaredConstructor().newInstance();
-		}
-		catch (Exception e) {
-			throw new RuntimeException(e);
+		NodeList eReader = element.getElementsByTagName("reader");
+		String sReader = eReader.getLength() == 0 ? null : eReader.item(0).getTextContent();
+		TransactionHistoryReader reader = null;
+		if (sReader != null) {
+			try {
+				reader = (TransactionHistoryReader) Class.forName(sReader)
+						.getDeclaredConstructor().newInstance();
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
 		}
 		
-		return new Account(id, institution, numbers, type, name, shortName, reader);
+		return new Account(id, institution, numberHashes, type, name, shortName, reader);
+	}
+
+
+	/**
+	 * Create a hash of the account number
+	 * 
+	 * @param accountNumber the account number
+	 * @return the hash
+	 */
+	public static String hashNumber(String accountNumber) {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA3-256");
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new InternalError("SHA3-256 is not supported");
+		}
+		final byte[] hashbytes = digest.digest(accountNumber.getBytes(StandardCharsets.UTF_8));
+		return Utils.bytesToHex(hashbytes);
 	}
 }

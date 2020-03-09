@@ -137,10 +137,11 @@ public class OfxFile {
 	 */
 	public Account matchAccount(Accounts accounts) {
 		
+		String numberHash = Account.hashNumber(accountNumber);
 		for (Account a : accounts.getAll()) {
 			if (!a.getInstitution().equals(institution)) continue;
 			if (!a.getType().equals(accountType)) continue;
-			if (!a.getNumbers().contains(accountNumber)) continue;
+			if (!a.getNumberHashes().contains(numberHash)) continue;
 			
 			return a;
 		}
@@ -164,7 +165,8 @@ public class OfxFile {
 		}
 		
 		String accountName = institution + " " + shortNumber;
-		return new Account(id, institution, Collections.singletonList(accountNumber),
+		String numberHash = Account.hashNumber(accountNumber);
+		return new Account(id, institution, Collections.singletonList(numberHash),
 				accountType, accountName, accountName, null);
 	}
 	
