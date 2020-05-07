@@ -9,5 +9,4 @@ module goldfish {
 
 	requires transitive java.desktop;
 	requires transitive java.xml;
-	requires opencsv;
 }
