@@ -213,9 +213,10 @@ public class OfxFile {
 			String strAmount = e.getText("TRNAMT");
 			boolean positive = strAmount.startsWith("+") || Character.isDigit(strAmount.charAt(0));
 			boolean negative = strAmount.startsWith("-");
-			if (strAmount == null || strAmount.length() < 5 || (!positive && !negative)
+			if (strAmount == null || strAmount.length() < 4 || (!positive && !negative)
 					|| strAmount.charAt(strAmount.length() - 3) != '.') {
-				throw new ParseException("Cannot determine the transaction amount", 0);
+				throw new ParseException("Cannot determine the transaction amount from \""
+					+ strAmount +"\"", 0);
 			}
 			int cents = Integer.parseInt(strAmount.substring(0, strAmount.length() - 3)
 					+ strAmount.substring(strAmount.length() - 2));
