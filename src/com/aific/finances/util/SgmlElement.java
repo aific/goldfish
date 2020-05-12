@@ -284,7 +284,7 @@ public class SgmlElement {
 						// Should this be an error?
 					}
 					inner.text += text;
-					inner.text = inner.text.strip();
+					inner.text = inner.text.trim();
 				}
 			}
 		}

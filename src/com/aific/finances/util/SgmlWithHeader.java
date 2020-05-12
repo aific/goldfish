@@ -69,7 +69,7 @@ public class SgmlWithHeader {
 	        while ((l = in.readLine()) != null) {
 	        	
 	        	if (!inContent) {
-		        	if (l.isBlank()) {
+		        	if (l.trim().isEmpty()) {
 		        		inContent = true;
 		        	}
 		        	else {
