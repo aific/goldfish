@@ -1,4 +1,5 @@
 *~
+*.swp
 bin
 dist
 .DS_Store
