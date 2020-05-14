@@ -51,8 +51,11 @@ public class OfxFile {
 		if (institution == null || institution.isEmpty()) {
 			throw new ParseException("Cannot determine the financial institution", 0);
 		}
-		if (institution.equals("Sovereign Bank New")) {
+		else if (institution.equals("Sovereign Bank New")) {
 			institution = "Santander Bank";
+		}
+		else if (institution.equals("B1")) {
+			institution = "Chase";
 		}
 		
 		
@@ -213,13 +216,25 @@ public class OfxFile {
 			String strAmount = e.getText("TRNAMT");
 			boolean positive = strAmount.startsWith("+") || Character.isDigit(strAmount.charAt(0));
 			boolean negative = strAmount.startsWith("-");
-			if (strAmount == null || strAmount.length() < 4 || (!positive && !negative)
-					|| strAmount.charAt(strAmount.length() - 3) != '.') {
+			if (strAmount == null || strAmount.isEmpty() || (!positive && !negative)) {
 				throw new ParseException("Cannot determine the transaction amount from \""
 					+ strAmount +"\"", 0);
 			}
-			int cents = Integer.parseInt(strAmount.substring(0, strAmount.length() - 3)
-					+ strAmount.substring(strAmount.length() - 2));
+
+			String strWhole, strCents;
+			if (strAmount.length() > 3 && strAmount.charAt(strAmount.length() - 3) == '.') {
+				strWhole = strAmount.substring(0, strAmount.length() - 3);
+				strCents = strAmount.substring(strAmount.length() - 2); 
+			}
+			else if (strAmount.length() > 2 && strAmount.charAt(strAmount.length() - 2) == '.') {
+				strWhole = strAmount.substring(0, strAmount.length() - 2);
+				strCents = strAmount.substring(strAmount.length() - 1) + "0";
+			}
+			else {
+				throw new ParseException("Cannot determine the transaction amount from \""
+						+ strAmount +"\"", 0);
+			}
+			int cents = Integer.parseInt(strWhole + strCents);
 			
 			String fitId = e.getText("FITID");
 			if (name == null || name.isEmpty()) {

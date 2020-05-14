@@ -64,6 +64,30 @@ public class FileChoosers {
 	
 	
 	/**
+	 * Choose one or more transaction files to open
+	 */
+	public static File[] chooseTransactionsImportFiles(Component parent, String title)
+	{
+		Frame frame = parent instanceof Frame ? (Frame) parent : null;
+		FileDialog fd = new FileDialog(frame, title, FileDialog.LOAD);
+		
+		if (lastChosenTransactionsImportFile != null) {
+			fd.setDirectory(lastChosenTransactionsImportFile.getParentFile().getAbsolutePath());
+			fd.setFile(lastChosenTransactionsImportFile.getName());
+		}
+		fd.setFilenameFilter(importFilter);
+		fd.setMultipleMode(true);
+		
+		fd.setVisible(true);
+		
+		File[] f = fd.getFiles();
+		if (f == null || f.length == 0) return null;
+		lastChosenTransactionsImportFile = f[0];
+		return f;
+	}
+	
+	
+	/**
 	 * Choose a document file to open or save
 	 */
 	public static File chooseDocumentFile(Component parent, String title, boolean open)

@@ -120,9 +120,9 @@
     </detectors>
   </category>
 
-  <category id="transportation">
-    <name>Transportation</name>
-    <color_red>255</color_red>
+  <category id="services">
+    <name>Services</name>
+    <color_red>176</color_red>
     <color_green>176</color_green>
     <color_blue>255</color_blue>
     <type>EXPENSE</type>
@@ -130,11 +130,11 @@
     </detectors>
   </category>
 
-  <category id="car">
-    <name>Car</name>
-    <color_red>176</color_red>
-    <color_green>100</color_green>
-    <color_blue>176</color_blue>
+  <category id="transportation">
+    <name>Transportation</name>
+    <color_red>255</color_red>
+    <color_green>176</color_green>
+    <color_blue>255</color_blue>
     <type>EXPENSE</type>
     <detectors>
     </detectors>
@@ -181,7 +181,7 @@
   </category>
 
   <category id="school">
-    <name>School</name>
+    <name>School &amp; Activities</name>
     <color_red>196</color_red>
     <color_green>196</color_green>
     <color_blue>196</color_blue>=
@@ -190,11 +190,11 @@
     </detectors>
   </category>
 
-  <category id="phone">
-    <name>Phone</name>
+  <category id="phone_computer">
+    <name>Phone &amp; Computer</name>
     <color_red>255</color_red>
     <color_green>170</color_green>
-    <color_blue>0</color_blue>=
+    <color_blue>0</color_blue>
     <type>EXPENSE</type>
     <detectors>
     </detectors>

@@ -66,13 +66,19 @@ public class SgmlWithHeader {
 			
 	        String l;
 	        boolean inContent = false;
+	        boolean foundHeader = false;
 	        while ((l = in.readLine()) != null) {
 	        	
 	        	if (!inContent) {
 		        	if (l.trim().isEmpty()) {
+		        		if (foundHeader) inContent = true;
+		        	}
+		        	else if (l.trim().startsWith("<")) {
 		        		inContent = true;
+		        		contentBuilder.append(l).append("\n");
 		        	}
 		        	else {
+		        		foundHeader = true;
 		        		int separator = l.indexOf(':');
 		        		if (separator < 0) {
 		        			throw new ParseException("A header line without ':'", 0);

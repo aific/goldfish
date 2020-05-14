@@ -217,49 +217,51 @@ public class MainMenu implements ActionListener {
 			
 			if (e.getSource() == fileImportMenuItem) {
 				
-				File f = FileChoosers.chooseTransactionsImportFile(frame, "Import Transactions", true);
-				if (f == null) return;
+				File[] files = FileChoosers.chooseTransactionsImportFiles(frame, "Import Transactions");
+				if (files == null || files.length == 0) return;
 				
 				Accounts accounts = MainFrame.getInstance().getDocument().getAccounts();
 				Collection<Transaction> transactions = null;
 				
-				String extension = Utils.getExtension(f).toLowerCase();
-				switch (extension) {
-				case "ofx":
-				case "qfx": {
-					OfxFile ofx = new OfxFile(f);
-					if (!ofx.getCurrency().equals("USD")) {
-						throw new Exception("The only currency we currently support is USD");
+				for (File f : files) {
+					String extension = Utils.getExtension(f).toLowerCase();
+					switch (extension) {
+					case "ofx":
+					case "qfx": {
+						OfxFile ofx = new OfxFile(f);
+						if (!ofx.getCurrency().equals("USD")) {
+							throw new Exception("The only currency we currently support is USD");
+						}
+						Account a = ofx.matchAccount(accounts);
+						if (a == null) {
+							a = ofx.getAccount();
+							if (JOptionPane.showConfirmDialog(MainFrame.getInstance(),
+									"Account \"" + a.getName() + "\" is not yet in the document. Add it?",
+									"Import Transactions",
+									 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
+									!= JOptionPane.YES_OPTION) return;
+							accounts.add(a);
+						}
+						transactions = ofx.loadTransactions(a);
+						break;
 					}
-					Account a = ofx.matchAccount(accounts);
-					if (a == null) {
-						a = ofx.getAccount();
-						if (JOptionPane.showConfirmDialog(MainFrame.getInstance(),
-								"Account \"" + a.getName() + "\" is not yet in the document. Add it?",
-								"Import Transactions",
-								 JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE)
-								!= JOptionPane.YES_OPTION) return;
-						accounts.add(a);
+					default:
+						throw new Exception("Unsupported file type");
 					}
-					transactions = ofx.loadTransactions(a);
-					break;
+					
+					if (transactions == null) {
+						throw new Exception("Internal error");
+					}
+					
+					MainFrame.getInstance().getDocument().getCategories().detectCategoriesAll(transactions,
+							MainFrame.getInstance().getTransactionTable().getTransactions());
+					
+					MainFrame.getInstance().getTransactionTable().setVisible(false);
+					MainFrame.getInstance().getTransactionTable().getTransactions().addAll(transactions);
+					MainFrame.getInstance().getTransactionTable().adjustColumns();
+					MainFrame.getInstance().getTransactionTable().setVisible(true);
+					MainFrame.getInstance().setModified();
 				}
-				default:
-					throw new Exception("Unsupported file type");
-				}
-				
-				if (transactions == null) {
-					throw new Exception("Internal error");
-				}
-				
-				MainFrame.getInstance().getDocument().getCategories().detectCategoriesAll(transactions,
-						MainFrame.getInstance().getTransactionTable().getTransactions());
-				
-				MainFrame.getInstance().getTransactionTable().setVisible(false);
-				MainFrame.getInstance().getTransactionTable().getTransactions().addAll(transactions);
-				MainFrame.getInstance().getTransactionTable().adjustColumns();
-				MainFrame.getInstance().getTransactionTable().setVisible(true);
-				MainFrame.getInstance().setModified();
 			}
 			
 			
