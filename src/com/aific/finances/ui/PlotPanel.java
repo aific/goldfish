@@ -1,25 +1,32 @@
 package com.aific.finances.ui;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.AncestorListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -53,14 +60,20 @@ public class PlotPanel extends JPanel {
 
 	private CollectionChartDataSource<Transaction, TimePeriod> dataSource;
 	private CollectionChartDataSource<Transaction, TimePeriod> netDataSource;
+	private CollectionChartDataSource<Transaction, Category> dataSourceByCategory;
 
 	private JPanel mainConfigurationPanel;
 	private JComboBox<PlotConents> plotContentsCombo;
 	private JComboBox<PlotTimeUnit> plotTimeUnitCombo;
 	private JComboBox<PlotType> plotTypeCombo;
+	private JSlider plotFromSlider;
+	private JSlider plotToSlider;
 	
 	private JSplitPane splitPaneWithSeries;
+	private JPanel chartCardPanel;
+	private CardLayout chartCardLayout;
 	private Chart<TimePeriod> chart;
+	private Chart<Category> chartByCategory;
 	private ChartSeriesTable seriesTable;
 	
 	private ChartSeries netSeries = new BasicChartSeries("Net", Color.BLUE);
@@ -72,6 +85,7 @@ public class PlotPanel extends JPanel {
 	private ChartRenderer<TimePeriod> lineChartRenderer = new LineChartRenderer<>();
 	private ChartRenderer<TimePeriod> barChartRenderer = new BarChartRenderer<>();
 	private ChartRenderer<TimePeriod> stackedBarChartRenderer = new StackedBarChartRenderer<>();
+	private ChartRenderer<Category> stackedBarChartByCategoryRenderer = new StackedBarChartRenderer<>();
 	
 	
 	/**
@@ -144,8 +158,48 @@ public class PlotPanel extends JPanel {
 		
 		y++;
 		
+		JLabel plotFromLabel = new JLabel("From: ");
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0;
+		c.gridx = 0;
+		c.gridy = y;
+		mainConfigurationPanel.add(plotFromLabel, c);
+
+		plotFromSlider = new JSlider();
+		plotFromSlider.setMinimum(0);
+		plotFromSlider.setMaximum(100000);
+		plotFromSlider.setValue(0);
+		plotFromSlider.addChangeListener(handler);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.gridx = 1;
+		c.gridy = y;
+		mainConfigurationPanel.add(plotFromSlider, c);
 		
-		// The chart
+		y++;
+		
+		JLabel plotToLabel = new JLabel("To: ");
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 0;
+		c.gridx = 0;
+		c.gridy = y;
+		mainConfigurationPanel.add(plotToLabel, c);
+
+		plotToSlider = new JSlider();
+		plotToSlider.setMinimum(0);
+		plotToSlider.setMaximum(100000);
+		plotToSlider.setValue(100000);
+		plotToSlider.addChangeListener(handler);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.gridx = 1;
+		c.gridy = y;
+		mainConfigurationPanel.add(plotToSlider, c);
+		
+		y++;
+		
+		
+		// The main chart
 		
 		dataSource = new CollectionChartDataSource<>(document.getTransactions(), null, null, null);
 		
@@ -159,6 +213,46 @@ public class PlotPanel extends JPanel {
 		
 		chart = new Chart<>();
 		chart.addDataSource(dataSource);
+		
+		
+		// The chart that displays values by categories
+		
+		dataSourceByCategory = new CollectionChartDataSource<>(document.getTransactions(), null, null, null);
+		dataSourceByCategory.setCategoryFunction(t -> t.getCategory() == null ? Category.NULL_CATEGORY : t.getCategory());
+		
+		Comparator<ChartSeries> categoriesComparator = new Comparator<ChartSeries>() {
+			@Override
+			public int compare(ChartSeries a, ChartSeries b) {
+				return a.getName().compareToIgnoreCase(b.getName());
+			}
+		};
+		
+		ArrayList<Category> categoriesAxis = new ArrayList<>();
+		categoriesAxis.add(Category.NULL_CATEGORY);
+		categoriesAxis.addAll(document.getCategories().getCategories().stream()
+				.filter(x -> x.getType() == CategoryType.INCOME)
+				.sorted(categoriesComparator)
+				.collect(Collectors.toList()));
+		categoriesAxis.addAll(document.getCategories().getCategories().stream()
+				.filter(x -> x.getType() == CategoryType.EXPENSE)
+				.sorted(categoriesComparator)
+				.collect(Collectors.toList()));
+		categoriesAxis.addAll(document.getCategories().getCategories().stream()
+				.filter(x -> x.getType() == CategoryType.EXTERNAL)
+				.sorted(categoriesComparator)
+				.collect(Collectors.toList()));
+		
+		chartByCategory = new Chart<>();
+		chartByCategory.addDataSource(dataSourceByCategory);
+		chartByCategory.setSortedCategoryValues(categoriesAxis);
+		
+		
+		// The chart cards panel
+		
+		chartCardLayout = new CardLayout();
+		chartCardPanel = new JPanel(chartCardLayout);
+		chartCardPanel.add(chart, "chart");
+		chartCardPanel.add(chartByCategory, "chartByCategory");
 		
 		
 		// The chart series panel
@@ -179,7 +273,7 @@ public class PlotPanel extends JPanel {
 		// The split view with the chart series panel
 		
 		splitPaneWithSeries = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, true,
-				chart, seriesTableScroll);
+				chartCardPanel, seriesTableScroll);
 		splitPaneWithSeries.setResizeWeight(1);
 		add(splitPaneWithSeries, BorderLayout.CENTER);
 		
@@ -237,6 +331,10 @@ public class PlotPanel extends JPanel {
 			if (series.isEmpty()) return true;
 			return series.contains(s);
 		});
+		dataSourceByCategory.setSeriesVisibilityPredicate(s -> {
+			if (series.isEmpty()) return true;
+			return series.contains(s);
+		});
 		netDataSource.setSeriesVisibilityPredicate(s -> {
 			if (series.isEmpty()) return true;
 			return series.contains(s);
@@ -265,6 +363,20 @@ public class PlotPanel extends JPanel {
 			break;
 		}
 		
+		chartByCategory.getLastLayer().setRenderer(stackedBarChartByCategoryRenderer);
+
+		
+		// Select the chart
+		
+		switch ((PlotConents) plotContentsCombo.getSelectedItem()) {
+		case CATEGORIES:
+			chartCardLayout.show(chartCardPanel, "chartByCategory");
+			break;
+		default:
+			chartCardLayout.show(chartCardPanel, "chat");
+			break;
+		}
+		
 		
 		// Set the X axis
 
@@ -280,20 +392,32 @@ public class PlotPanel extends JPanel {
 		default:
 			break;
 		}
-		
+
+		TimePeriod xMin;
+		TimePeriod xMax;
 		if (transactions.isEmpty() || dateToTimePeriod == null) {
+			xMin = xMax = new Month(new Date());
 			chart.setCategoryValues(null);
 			dataSource.setCategoryFunction(t -> t.getMonth());
 			netDataSource.setCategoryFunction(t -> t.getMonth());
 		}
 		else {
-			TimePeriod xMin = transactions.get(0).getMonth();
-			TimePeriod xMax = transactions.get(0).getMonth();
+			xMin = dateToTimePeriod.apply(transactions.get(0).getDate());
+			xMax = dateToTimePeriod.apply(transactions.get(0).getDate());
 			for (Transaction t : transactions) {
 				TimePeriod p = dateToTimePeriod.apply(t.getDate());
 				if (p.compareTo(xMin) < 0) xMin = p; 
 				if (p.compareTo(xMax) > 0) xMax = p; 
 			}
+			
+			int length = xMin.countUntil(xMax);
+			plotFromSlider.setMinimum(0);
+			plotFromSlider.setMaximum(length-1);
+			plotToSlider.setMinimum(0);
+			plotToSlider.setMaximum(length-1);
+			
+			xMax = xMin.add(Math.min(plotToSlider.getValue(), length));
+			xMin = xMin.add(Math.min(plotFromSlider.getValue(), length));
 			
 			List<TimePeriod> l = new ArrayList<>();
 			for (TimePeriod p = xMin; p.compareTo(xMax) <= 0; p = p.getNext()) {
@@ -305,51 +429,60 @@ public class PlotPanel extends JPanel {
 			netDataSource.setCategoryFunction(t -> fn.apply(t.getDate()));
 		}
 		
+		final TimePeriod minPeriod = xMin;
+		final TimePeriod maxPeriod = xMax;
+		int numPeriods = xMin.countUntil(xMax);
+		
 		
 		// Set the data functions and the data sources
 		
 		chart.removeDataSource(netDataSource);
 		chart.setSortedSeriesValues();
+		chartByCategory.setSortedSeriesValues();
+		
+		Function<Transaction, Double> valueFunction;
+		Function<Transaction, ? extends ChartSeries> seriesFunction;
+		Predicate<Transaction> pointVisibilityFunction;
 
 		switch ((PlotConents) plotContentsCombo.getSelectedItem()) {
 		case EXPENSES:
-			dataSource.setValueFunction(t -> {
+			valueFunction = t -> {
 				double v = t.getCents() / 100.0;
 				Category c = t.getCategory();
 				if (c == null) return -v;
 				if (c.getType() == CategoryType.EXPENSE) v = -v;
 				return v;
-			});
-			dataSource.setSeriesFunction(t -> {
+			};
+			seriesFunction = t -> {
 				return t.getCategory() == null ? otherSeries : t.getCategory();
-			});
-			dataSource.setPointVisibilityPredicate(t -> {
+			};
+			pointVisibilityFunction = t -> {
 				Category c = t.getCategory();
 				if (c == null) return t.getCents() < 0;
 				return c.getType() == CategoryType.EXPENSE;
-			});
+			};
 			break;
 		case INCOME:
-			dataSource.setValueFunction(t -> t.getCents() / 100.0);
-			dataSource.setSeriesFunction(t -> {
+			valueFunction = t -> t.getCents() / 100.0;
+			seriesFunction = t -> {
 				return t.getCategory() == null ? otherSeries : t.getCategory();
-			});
-			dataSource.setPointVisibilityPredicate(t -> {
+			};
+			pointVisibilityFunction = t -> {
 				Category c = t.getCategory();
 				if (c == null) return t.getCents() > 0;
 				return c.getType() == CategoryType.INCOME;
-			});
+			};
 			break;
 		case SUMMARY:
-			dataSource.setValueFunction(t -> {
+			valueFunction = t -> {
 				double v = t.getCents() / 100.0;
 				Category c = t.getCategory();
 				if (c == null) return Math.abs(v);
 				if (c.getType() == CategoryType.BALANCED) return 0.0;
 				if (c.getType() == CategoryType.EXPENSE ) v = -v;
 				return v;
-			});
-			dataSource.setSeriesFunction(t -> {
+			};
+			seriesFunction = t -> {
 				Category c = t.getCategory();
 				if (c != null) {
 					switch (c.getType()) {
@@ -360,28 +493,61 @@ public class PlotPanel extends JPanel {
 					}
 				}
 				return t.getCents() > 0 ? incomeSeries : expensesSeries;
-			});
-			dataSource.setPointVisibilityPredicate(t -> {
+			};
+			pointVisibilityFunction = t -> {
 				Category c = t.getCategory();
 				return c == null || c.getType() != CategoryType.BALANCED;
-			});
+			};
 			chart.addDataSource(netDataSource);
 			chart.setSortedSeriesValues(incomeSeries, expensesSeries, externalSeries, netSeries);
 			break;
+		case CATEGORIES:
+			valueFunction = t -> {
+				double v = t.getCents() / 100.0;
+				Category c = t.getCategory();
+				if (c == null) return Math.abs(v);
+				if (c.getType() == CategoryType.BALANCED) return 0.0;
+				if (c.getType() == CategoryType.EXPENSE ) v = -v;
+				if (c.getType() == CategoryType.EXTERNAL) v = -v;
+				return v;
+			};
+			seriesFunction = t -> {
+				return t.getCategory() == null ? otherSeries : t.getCategory();
+			};
+			pointVisibilityFunction = t -> {
+				Category c = t.getCategory();
+				return c == null || c.getType() != CategoryType.BALANCED;
+			};
+			break;
 		case SAVINGS:
-			dataSource.setValueFunction(t -> -t.getCents() / 100.0);
-			dataSource.setSeriesFunction(t -> {
+			valueFunction = t -> -t.getCents() / 100.0;
+			seriesFunction = t -> {
 				return t.getCategory() == null ? externalSeries : t.getCategory();
-			});
-			dataSource.setPointVisibilityPredicate(t -> {
+			};
+			pointVisibilityFunction = t -> {
 				Category c = t.getCategory();
 				if (c == null) return false;
 				return c.getType() == CategoryType.EXTERNAL;
-			});
+			};
 			break;
 		default:
+			valueFunction = null;
+			seriesFunction = null;
+			pointVisibilityFunction = null;
 			break;
 		}
+		
+		pointVisibilityFunction = pointVisibilityFunction.and(t -> {
+			return minPeriod.containsUntil(maxPeriod, t.getDate());
+		});
+		
+		dataSource.setValueFunction(valueFunction);
+		dataSource.setSeriesFunction(seriesFunction);
+		dataSource.setPointVisibilityPredicate(pointVisibilityFunction);
+		
+		dataSourceByCategory.setValueFunction(valueFunction.andThen(v -> v / Math.max(1, numPeriods)));
+		dataSourceByCategory.setSeriesFunction(seriesFunction);
+		dataSourceByCategory.setPointVisibilityPredicate(pointVisibilityFunction);
 	}
 	
 	
@@ -414,6 +580,22 @@ public class PlotPanel extends JPanel {
 						|| c == netSeries || c == externalSeries;
 			});
 			break;
+		case CATEGORIES:
+			// TODO Sort appropriately
+			seriesTable.setFilter(c -> {
+				if (c instanceof Category) {
+					switch (((Category) c).getType()) {
+					case INCOME:
+					case EXPENSE:
+					case EXTERNAL:
+						return true;
+					default:
+						return false;
+					}
+				}
+				return c == otherSeries;
+			});
+			break;
 		case SAVINGS:
 			seriesTable.setFilter(c -> {
 				if (c instanceof Category) {
@@ -433,10 +615,11 @@ public class PlotPanel extends JPanel {
 	 */
 	private enum PlotConents
 	{
-		SUMMARY  ("Summary"),
-		EXPENSES ("Expenses"),
-		INCOME   ("Income"),
-		SAVINGS  ("Savings");
+		SUMMARY     ("Summary over Time"),
+		CATEGORIES  ("Summary by Category"),
+		EXPENSES    ("Expenses"),
+		INCOME      ("Income"),
+		SAVINGS     ("Savings");
 		
 		
 		private String description;
@@ -501,15 +684,15 @@ public class PlotPanel extends JPanel {
 	 */
 	private enum PlotType
 	{
-		BAR   ("Bar"),
-		LINE  ("Line");
+		BAR      ("Bar"),
+		LINE     ("Line");
 		
 		
 		private String description;
 		
 		
 		/**
-		 * Create an instance of the class
+		 * Create an instance of the classchartCardPanel
 		 */
 		PlotType(String description)
 		{
@@ -533,7 +716,7 @@ public class PlotPanel extends JPanel {
 	 * An event handler
 	 */
 	private class Handler implements ActionListener, ListSelectionListener,
-		TransactionListListener
+		TransactionListListener, ChangeListener
 	{
 
 		/**
@@ -600,6 +783,18 @@ public class PlotPanel extends JPanel {
 		 */
 		public void transactionsDataChanged(TransactionList list)
 		{
+			configureChart();
+			repaint();
+		}
+
+
+		/**
+		 * State changed
+		 * 
+		 * @param e the event
+		 */
+		@Override
+		public void stateChanged(ChangeEvent e) {
 			configureChart();
 			repaint();
 		}

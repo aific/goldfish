@@ -30,6 +30,22 @@ public abstract class TimePeriod implements Comparable<TimePeriod> {
 	
 	
 	/**
+	 * Add
+	 * 
+	 * @param n the number of periods to add
+	 * @return the resulting time period
+	 */
+	public TimePeriod add(int n) {
+		if (n < 0) throw new IllegalArgumentException();
+		TimePeriod p = this;
+		for (int i = 0; i < n; i++) {
+			p = p.getNext();
+		}
+		return p;
+	}
+	
+	
+	/**
 	 * Determine if the given date falls within this date range
 	 * 
 	 * @param date the date
@@ -39,6 +55,37 @@ public abstract class TimePeriod implements Comparable<TimePeriod> {
 	{
 		return date.compareTo(first) >= 0
 				&& date.compareTo(last) <= 0;
+	}
+	
+	
+	/**
+	 * Determine if the given date falls within this date range until the end
+	 * of the other range
+	 * 
+	 * @param end the final time period (inclusive)
+	 * @param date the date
+	 * @return true if it falls into this date range
+	 */
+	public boolean containsUntil(TimePeriod end, Date date)
+	{
+		return date.compareTo(first) >= 0
+				&& date.compareTo(end.last) <= 0;
+	}
+	
+	
+	/**
+	 * Count how many time periods are in between
+	 * 
+	 * @param end the final time period (inclusive)
+	 * @return the count
+	 */
+	public int countUntil(TimePeriod end)
+	{
+		int count = 0;
+		for (TimePeriod p = this; p.compareTo(end) <= 0; p = p.getNext()) {
+			count++;
+		}
+		return count;
 	}
 	
 	

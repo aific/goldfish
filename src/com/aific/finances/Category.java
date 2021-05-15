@@ -27,6 +27,7 @@ import com.aific.finances.plot.ChartSeries;
 public class Category implements ChartSeries, Comparable<Category> {
 	
 	public static final String XML_ELEMENT = "category";
+	public static final Category NULL_CATEGORY = new Category(null, null, "(other)", null, Color.BLACK);
 
 	private Categories categories;
 	
@@ -63,12 +64,16 @@ public class Category implements ChartSeries, Comparable<Category> {
 		this.detectors = new HashMap<String, CategoryDetector>();
 		this.nullDetector = new CategoryDetector(id, this, null, null, ".*", 0, 0, null, null);
 		
-		add(nullDetector);
+		if (categories != null) {
+			add(nullDetector);
+		}
 		
-		synchronized (categories) {
-			int c = categories.categories.size();
-			categories.categories.add(this);
-			categories.fireCategoriesAdded(c, c);
+		if (categories != null && id != null) {
+			synchronized (categories) {
+				int c = categories.categories.size();
+				categories.categories.add(this);
+				categories.fireCategoriesAdded(c, c);
+			}
 		}
 	}
 	
@@ -482,6 +487,11 @@ public class Category implements ChartSeries, Comparable<Category> {
 	@Override
 	public int compareTo(Category other) {
 		if (other == null) return 1;
+		if (other == this) return 0;
+		
+		if (this == NULL_CATEGORY) return -1;
+		if (other == NULL_CATEGORY) return 1;
+		
 		int r = name.compareTo(other.name);
 		if (r != 0) return r;
 		return id.compareTo(other.id);

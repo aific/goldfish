@@ -14,6 +14,22 @@ import com.aific.finances.util.Utils;
 public class Main {
 	
 	public static final String PROGRAM_NAME = "Goldfish Finances";
+	
+	
+	/**
+	 * Set a property with silent failover
+	 * 
+	 * @param key the key
+	 * @param value the value
+	 */
+	private static void setSystemProperty(String key, String value) {
+		try {
+			System.setProperty(key, value);
+		}
+		catch (Exception e) {
+			// do a silent fail-over
+		}
+	}
 
 	
 	/**
@@ -25,13 +41,13 @@ public class Main {
 		
 		// Set-up platform-specific properties
 		
+		setSystemProperty("apple.laf.useScreenMenuBar", "true");
+		setSystemProperty("com.apple.mrj.application.growbox.intrudes", "false");
+		setSystemProperty("com.apple.mrj.application.apple.menu.about.name", PROGRAM_NAME);
+		setSystemProperty("com.apple.macos.smallTabs", "true");
+		setSystemProperty("com.apple.mrj.application.live-resize", "true");
+		
 		try {
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-			System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
-			System.setProperty("com.apple.mrj.application.apple.menu.about.name", PROGRAM_NAME);
-			System.setProperty("com.apple.macos.smallTabs", "true");
-			System.setProperty("com.apple.mrj.application.live-resize", "true");
-			
 			if (!Utils.IS_LINUX) {
 				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			}
