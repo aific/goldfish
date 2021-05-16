@@ -54,7 +54,7 @@ runtime {
 
     jpackage {
         imageName = 'Goldfish Finances'
-        appVersion = '0.4.2'
+        appVersion = '0.4.3'
         imageOptions = ["--icon", "src/resources/goldfish.icns"]
     }
 }
