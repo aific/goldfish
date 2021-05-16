@@ -73,6 +73,8 @@ public class PlotPanel extends JPanel {
 	private JPanel chartCardPanel;
 	private CardLayout chartCardLayout;
 	private Chart<TimePeriod> chart;
+	private JPanel chartByCategoryPanel;
+	private JLabel chartByCategoryLabel;
 	private Chart<Category> chartByCategory;
 	private ChartSeriesTable seriesTable;
 	
@@ -217,6 +219,8 @@ public class PlotPanel extends JPanel {
 		
 		// The chart that displays values by categories
 		
+		chartByCategoryPanel = new JPanel(new BorderLayout());
+		
 		dataSourceByCategory = new CollectionChartDataSource<>(document.getTransactions(), null, null, null);
 		dataSourceByCategory.setCategoryFunction(t -> t.getCategory() == null ? Category.NULL_CATEGORY : t.getCategory());
 		
@@ -228,7 +232,6 @@ public class PlotPanel extends JPanel {
 		};
 		
 		ArrayList<Category> categoriesAxis = new ArrayList<>();
-		categoriesAxis.add(Category.NULL_CATEGORY);
 		categoriesAxis.addAll(document.getCategories().getCategories().stream()
 				.filter(x -> x.getType() == CategoryType.INCOME)
 				.sorted(categoriesComparator)
@@ -237,6 +240,7 @@ public class PlotPanel extends JPanel {
 				.filter(x -> x.getType() == CategoryType.EXPENSE)
 				.sorted(categoriesComparator)
 				.collect(Collectors.toList()));
+		categoriesAxis.add(Category.NULL_CATEGORY);
 		categoriesAxis.addAll(document.getCategories().getCategories().stream()
 				.filter(x -> x.getType() == CategoryType.EXTERNAL)
 				.sorted(categoriesComparator)
@@ -246,13 +250,18 @@ public class PlotPanel extends JPanel {
 		chartByCategory.addDataSource(dataSourceByCategory);
 		chartByCategory.setSortedCategoryValues(categoriesAxis);
 		
+		chartByCategoryPanel.add(chartByCategory, BorderLayout.CENTER);
+		
+		chartByCategoryLabel = new JLabel("N/A");
+		chartByCategoryPanel.add(chartByCategoryLabel, BorderLayout.SOUTH);
+		
 		
 		// The chart cards panel
 		
 		chartCardLayout = new CardLayout();
 		chartCardPanel = new JPanel(chartCardLayout);
 		chartCardPanel.add(chart, "chart");
-		chartCardPanel.add(chartByCategory, "chartByCategory");
+		chartCardPanel.add(chartByCategoryPanel, "chartByCategory");
 		
 		
 		// The chart series panel
@@ -263,9 +272,11 @@ public class PlotPanel extends JPanel {
 		seriesTable.addAdditionalSeries(netSeries);
 		seriesTable.addAdditionalSeries(otherSeries);
 		seriesTable.addAdditionalSeries(externalSeries);
+		seriesTable.addAdditionalSeries(Category.NULL_CATEGORY);
 		
 		seriesTable.setLegendType(LegendType.LINE);
 		seriesTable.getSelectionModel().addListSelectionListener(handler);
+		seriesTable.setSortedSeriesValues(categoriesAxis.toArray(new ChartSeries[0]));
 		
 		JScrollPane seriesTableScroll = new JScrollPane(seriesTable);
 		
@@ -373,7 +384,7 @@ public class PlotPanel extends JPanel {
 			chartCardLayout.show(chartCardPanel, "chartByCategory");
 			break;
 		default:
-			chartCardLayout.show(chartCardPanel, "chat");
+			chartCardLayout.show(chartCardPanel, "chart");
 			break;
 		}
 		
@@ -512,7 +523,7 @@ public class PlotPanel extends JPanel {
 				return v;
 			};
 			seriesFunction = t -> {
-				return t.getCategory() == null ? otherSeries : t.getCategory();
+				return t.getCategory() == null ? Category.NULL_CATEGORY : t.getCategory();
 			};
 			pointVisibilityFunction = t -> {
 				Category c = t.getCategory();
@@ -548,6 +559,25 @@ public class PlotPanel extends JPanel {
 		dataSourceByCategory.setValueFunction(valueFunction.andThen(v -> v / Math.max(1, numPeriods)));
 		dataSourceByCategory.setSeriesFunction(seriesFunction);
 		dataSourceByCategory.setPointVisibilityPredicate(pointVisibilityFunction);
+		
+		
+		// TODO Move this somewhere else
+		
+		int expenses = 0;
+		int income = 0;
+		for (Transaction t : document.getTransactions()) {
+			if (!pointVisibilityFunction.test(t)) continue;
+			if (!series.isEmpty() && !series.contains(seriesFunction.apply(t))) continue;
+			if (t.getCategory() == null || t.getCategory().getType() == CategoryType.EXPENSE) {
+				expenses += Math.abs(t.getCents());
+			}
+			if (t.getCategory() != null && t.getCategory().getType() == CategoryType.INCOME) {
+				income += Math.abs(t.getCents());
+			}
+		}
+		int avgExpenses = expenses / Math.max(1, numPeriods); 
+		int avgIncome = income / Math.max(1, numPeriods); 
+		chartByCategoryLabel.setText("Selected income: " + (avgIncome/100.00) + ", Selected expenses: " + (avgExpenses/100.00));
 	}
 	
 	
@@ -559,6 +589,7 @@ public class PlotPanel extends JPanel {
 		switch ((PlotConents) plotContentsCombo.getSelectedItem()) {
 		case EXPENSES:
 			seriesTable.setFilter(c -> {
+				if (c == Category.NULL_CATEGORY) return false;
 				if (c instanceof Category) {
 					return ((Category) c).getType() == CategoryType.EXPENSE;
 				}
@@ -567,6 +598,7 @@ public class PlotPanel extends JPanel {
 			break;
 		case INCOME:
 			seriesTable.setFilter(c -> {
+				if (c == Category.NULL_CATEGORY) return false;
 				if (c instanceof Category) {
 					return ((Category) c).getType() == CategoryType.INCOME;
 				}
@@ -576,6 +608,7 @@ public class PlotPanel extends JPanel {
 		case SUMMARY:
 			// TODO Sort appropriately
 			seriesTable.setFilter(c -> {
+				if (c == Category.NULL_CATEGORY) return false;
 				return c == incomeSeries || c == expensesSeries
 						|| c == netSeries || c == externalSeries;
 			});
@@ -583,6 +616,7 @@ public class PlotPanel extends JPanel {
 		case CATEGORIES:
 			// TODO Sort appropriately
 			seriesTable.setFilter(c -> {
+				if (c == Category.NULL_CATEGORY) return true;
 				if (c instanceof Category) {
 					switch (((Category) c).getType()) {
 					case INCOME:
@@ -593,11 +627,12 @@ public class PlotPanel extends JPanel {
 						return false;
 					}
 				}
-				return c == otherSeries;
+				return false;
 			});
 			break;
 		case SAVINGS:
 			seriesTable.setFilter(c -> {
+				if (c == Category.NULL_CATEGORY) return false;
 				if (c instanceof Category) {
 					return ((Category) c).getType() == CategoryType.EXTERNAL;
 				}

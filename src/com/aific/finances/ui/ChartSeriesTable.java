@@ -2,6 +2,7 @@ package com.aific.finances.ui;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.RowSorter;
@@ -30,6 +31,7 @@ public class ChartSeriesTable extends JBetterTable<ChartSeries> {
 	private Document document;
 	
 	private SeriesNameRenderer seriesNameRenderer;
+	private HashMap<ChartSeries, Integer> sortedSeries;
 	
 	
 	/**
@@ -46,6 +48,8 @@ public class ChartSeriesTable extends JBetterTable<ChartSeries> {
 						return object;
 					}
 				}));
+		
+		sortedSeries = null;
 
 		
 		// Set the cell editors and renderers
@@ -64,6 +68,13 @@ public class ChartSeriesTable extends JBetterTable<ChartSeries> {
 
 			@Override
 			public int compare(ChartSeries a, ChartSeries b) {
+				if (sortedSeries != null) {
+					Integer ap = sortedSeries.get(a); 
+					Integer bp = sortedSeries.get(b);
+					if (ap == null && bp != null) return 1;
+					if (ap != null && bp == null) return -1;
+					if (ap != null && bp != null) return ap.intValue() - bp.intValue();
+				}
 				return a.getName().compareToIgnoreCase(b.getName());
 			}
 		});
@@ -101,6 +112,25 @@ public class ChartSeriesTable extends JBetterTable<ChartSeries> {
 	public void prepareDispose()
 	{
 		this.document.getCategories().removeCategoriesListener(handler);
+	}
+	
+	
+	/**
+	 * Explicitly set the series values
+	 * 
+	 * @param xValues the sorted array of series values, or null to auto-generate
+	 */
+	public void setSortedSeriesValues(ChartSeries... values)
+	{
+		if (values.length == 0) {
+			sortedSeries = null;
+			return;
+		}
+		
+		HashMap<ChartSeries, Integer> l = new HashMap<>();
+		int pos = 0;
+		for (ChartSeries v : values) l.put(v, pos++);
+		sortedSeries = l;
 	}
 	
 	

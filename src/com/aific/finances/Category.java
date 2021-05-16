@@ -486,11 +486,14 @@ public class Category implements ChartSeries, Comparable<Category> {
 	 */
 	@Override
 	public int compareTo(Category other) {
-		if (other == null) return 1;
+		if (other == null) return -1;
 		if (other == this) return 0;
 		
-		if (this == NULL_CATEGORY) return -1;
-		if (other == NULL_CATEGORY) return 1;
+		if (this == NULL_CATEGORY) return 1;
+		if (other == NULL_CATEGORY) return -1;
+		
+		/*int t = getType().compareTo(other.getType());
+		if (t != 0) return t;*/
 		
 		int r = name.compareTo(other.name);
 		if (r != 0) return r;
